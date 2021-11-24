@@ -114,6 +114,7 @@ function morgan (format, options) {
     recordStartTime.call(req)
 
     function logRequest () {
+      res.responseTime = getResponseTimeToken(req, res);
       if (skip !== false && skip(req, res)) {
         debug('skip request')
         return
@@ -225,7 +226,11 @@ morgan.token('method', function getMethodToken (req) {
  * response time in milliseconds
  */
 
-morgan.token('response-time', function getResponseTimeToken (req, res, digits) {
+morgan.token('response-time', function(req, res) {
+  return res.responseTime;
+})
+
+function getResponseTimeToken (req, res, digits = 3) {
   if (!req._startAt || !res._startAt) {
     // missing request and/or response start time
     return
@@ -236,8 +241,8 @@ morgan.token('response-time', function getResponseTimeToken (req, res, digits) {
     (res._startAt[1] - req._startAt[1]) * 1e-6
 
   // return truncated value
-  return ms.toFixed(digits === undefined ? 3 : digits)
-})
+  return ms.toFixed(digits)
+}
 
 /**
  * total time in milliseconds
